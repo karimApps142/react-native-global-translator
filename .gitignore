@@ -1,0 +1,83 @@
+# ────────────────────────────────────────────────
+# 📦 React Native Library .gitignore
+# ────────────────────────────────────────────────
+
+# Node modules and package lock
+node_modules/
+package-lock.json
+yarn.lock
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Temporary and cache folders
+.tmp/
+temp/
+.cache/
+.expo/
+.expo-shared/
+dist/
+build/
+android/
+ios/
+coverage/
+
+# Metro bundler cache
+.expo/
+.expo-shared/
+.expo-go/
+.expo-cli/
+.expo-dev/
+
+# Babel cache
+.babelrc
+babel.config.js
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE folders
+.vscode/
+.idea/
+*.swp
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# React Native specific build artifacts
+*.iml
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# macOS system files
+*.DS_Store
+*.AppleDouble
+.LSOverride
+
+# VS Code workspace
+.vscode/
+
+# Lint and formatting cache
+.eslintcache
+.prettiercache
+
+# Misc
+*.log
+*.tmp
+*.orig
+
+# Ignore example app if this package has one
+example/
+examples/
+demo/

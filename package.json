@@ -1,0 +1,52 @@
+{
+  "name": "react-native-global-translator",
+  "version": "1.0.2",
+  "description": "A client-side library for React Native to dynamically manage translations and currencies from a central API using Zustand.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.js --format cjs,esm --dts",
+    "lint": "eslint .",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "react-native",
+    "localization",
+    "translation",
+    "i18n",
+    "zustand",
+    "dynamic",
+    "gemini"
+  ],
+  "author": "Nasir Saleem",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/karimApps142/react-native-global-translator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/karimApps142/react-native-global-translator/issues"
+  },
+  "homepage": "https://github.com/karimApps142/react-native-global-translator#readme",
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "@react-native-async-storage/async-storage": ">=1.0.0",
+    "react": ">=17.0.0",
+    "react-native": ">=0.60.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "zustand": "^4.5.0"
+  },
+  "devDependencies": {
+    "@react-native-async-storage/async-storage": "^1.23.1",
+    "eslint": "^8.57.0",
+    "react": "18.2.0",
+    "react-native": "0.74.1",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5"
+  }
+}

@@ -4,41 +4,41 @@
 ![License](https://img.shields.io/npm/l/react-native-global-translator)
 ![Downloads](https://img.shields.io/npm/dw/react-native-global-translator)
 
-A client-side library for React Native that provides seamless integration with the **Dynamic Global Language and Currency Management System**.  
-Built with Zustand for lightweight and powerful state management, this package handles all the complexity of fetching, caching, and updating translations automatically.
+A client-side library for React Native that provides seamless integration with a **Dynamic Global Language and Currency Management System**. Built with Zustand for lightweight and powerful state management, this package handles all the complexity of fetching, caching, and updating translations automatically.
 
 ---
 
 ## 🚀 Features
 
-- **Dynamic Translations:** Fetch all UI text directly from your central Laravel backend.
+- **Dynamic Translations:** Fetch all UI text directly from your central backend.
 - **Automatic Syncing:** Automatically checks for new translation versions on app launch and syncs if needed.
 - **Persistent Caching:** Uses AsyncStorage to cache translations, ensuring instant load times and offline availability.
 - **Lightweight State Management:** Powered by Zustand for a minimal footprint and a simple, hook-based API.
-- **Centralized Management:** All text is controlled from one web panel — no need for app updates to change a label.
+- **Centralized Management:** All text is controlled from one web panel—no need for app updates to change a label.
 - **Simple API:** Get started in minutes with a single `init` function and one simple hook.
 
 ---
 
 ## ⚙️ Prerequisites
 
-> **Important!**  
-> This package is the **client-side component** and is **useless** without the corresponding Laravel backend system.  
-> You must have the [Dynamic Global Language and Currency Management System](https://github.com/your-repo/laravel-global-translator-backend) set up and running.
+> **Important!**
+> This package is the **client-side component** and is **useless** without a compatible backend system. You must have an account and an API key from the management platform.
 
 Your backend will provide you with:
 
-1. An **API URL**
-2. An **API Key** for your mobile application
+1. An **API URL**.
+2. An **API Key** for your mobile application.
 
 ---
 
 ## 📦 Installation
 
 ```bash
-yarn add react-native-global-translator
+# Using npm
+npm install react-native-global-translator @react-native-async-storage/async-storage
 
-npm install @react-native-async-storage/async-storage
+# Using Yarn
+yarn add react-native-global-translator @react-native-async-storage/async-storage
 
 ```
 
@@ -60,6 +60,7 @@ initLocalization({
   apiUrl: "https://api.global.karimapps.com/api/v1", // <-- Your backend API URL
   apiKey: "YOUR_SECURE_API_KEY_HERE", // <-- Your app's unique API Key
   defaultLanguage: "en", // Optional: fallback language
+  fetchCurrencies: false, // Optional: set to true to enable currency fetching
 });
 
 const App = () => {
@@ -142,19 +143,19 @@ The `useLocalization()` hook returns an object with the following properties:
 | `status`      | `string`   | The current state of the store: `'idle'`, `'loading'`, `'ready'`, `'error'`. |
 | `currentLang` | `string`   | The currently active language code (e.g., `'en'`, `'es'`).                   |
 | `setLanguage` | `function` | Function to switch the language. Example: `setLanguage('es')`.               |
+| `currencies`  | `object`   | The object containing currency data, if fetchCurrencies was enabled.         |
 
 ---
 
 ## 🌍 Managing Your Translations
 
-All **languages**, **currencies**, **translation keys**, and **translated values** are managed through your centralized web-based **admin panel**.
+To get started, you first need an account on the management platform. Registration is handled by a Super Admin to ensure security.
+
+- **Platform URL:** [https://global.karimapps.com](https://global.karimapps.com)
+
+> ⚠️ **Note:** Please visit the main platform and contact the administrator for account setup. Once you have an account, you can log in to the admin panel to manage all your apps, languages, and translations.
 
 - **Admin Panel Login:** [https://global.karimapps.com/admin](https://global.karimapps.com/admin)
-- **Manage Translations:** [https://global.karimapps.com/admin/translation-keys](https://global.karimapps.com/admin/translation-keys)
-- **Manage Languages:** [https://global.karimapps.com/admin/languages](https://global.karimapps.com/admin/languages)
-
-> ⚠️ **Note:** Registration for new admin users is a protected action.  
-> Please contact system administrator to create an account.
 
 ## 🪪 License
 

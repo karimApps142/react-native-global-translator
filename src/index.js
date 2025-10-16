@@ -7,6 +7,7 @@ import { useLocalizationStore } from './store';
  * @param {string} config.apiUrl - The base URL for the API.
  * @param {string} config.apiKey - The plain-text API key.
  * @param {string} [config.defaultLanguage='en'] - The fallback language.
+ * @param {boolean} [config.fetchCurrencies=false] - Set to true to enable fetching currency data.
  */
 export const initLocalization = (config) => {
     return useLocalizationStore.getState().init(config);
@@ -17,8 +18,8 @@ export const initLocalization = (config) => {
  * @returns {object} - An object containing the t function, state, and actions.
  */
 export const useLocalization = () => {
-    // Select state from the store
-    const { translations, currentLang, status, setLanguage } = useLocalizationStore();
+    // Select state from the store, including currencies
+    const { translations, currencies, currentLang, status, setLanguage } = useLocalizationStore();
 
     /**
      * The translation function.
@@ -29,5 +30,6 @@ export const useLocalization = () => {
         return translations[key] || key;
     };
 
-    return { t, currentLang, status, setLanguage };
+    // Expose currencies in the return object
+    return { t, currencies, currentLang, status, setLanguage };
 };

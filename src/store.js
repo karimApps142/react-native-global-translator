@@ -7,42 +7,62 @@ import { configureApiClient, fetchSyncVersions, fetchTranslations, fetchCurrenci
 export const useLocalizationStore = create(
     persist(
         (set, get) => ({
-            // STATE
-            status: 'idle', // 'idle', 'loading', 'ready', 'error'
+            // STATE (no changes needed here)
+            status: 'idle',
             translations: {},
             currencies: {},
-            currentLang: 'en', // Default language, can be overridden by persisted state
+            currentLang: 'en',
             translationVersion: 0,
             currencyVersion: 0,
+            shouldFetchCurrencies: false,
 
-            // ACTIONS
-            init: async ({ apiUrl, apiKey, defaultLanguage = 'en' }) => {
+            // ACTIONS (all logic is refactored here)
+            init: async ({ apiUrl, apiKey, defaultLanguage = 'en', fetchCurrencies: enableCurrencies = false }) => {
                 if (!apiUrl || !apiKey) {
                     console.error('Localization Error: apiUrl and apiKey must be provided.');
                     return set({ status: 'error' });
                 }
                 configureApiClient(apiUrl, apiKey);
 
-                // If language isn't persisted, set default
+                set({ shouldFetchCurrencies: enableCurrencies });
+
+                // On init, if a language isn't set, use the default.
                 if (!get().currentLang) {
                     set({ currentLang: defaultLanguage });
                 }
 
+                // Always run fetchAndSync on startup.
                 get().fetchAndSync();
             },
 
             fetchAndSync: async () => {
-                const { currentLang, translationVersion } = get();
                 set({ status: 'loading' });
+
+                const langToFetch = get().currentLang;
+                const localVersion = get().translationVersion;
+
+                // Guard against fetching without a language
+                if (!langToFetch) {
+                    console.error('Localization Error: No language selected.');
+                    return set({ status: 'error' });
+                }
 
                 try {
                     const { data: serverVersions } = await fetchSyncVersions();
 
-                    if (serverVersions.translation_version > translationVersion) {
-                        console.log('New translations found! Fetching from server...');
-                        const { data: newTranslations } = await fetchTranslations(currentLang);
-                        const { data: newCurrencies } = await fetchCurrencies();
+                    // **CRITICAL FIX**: Check if a fetch is needed for EITHER a version mismatch OR because the current translations are for a different language.
+                    const needsFetch = serverVersions.translation_version > localVersion || Object.keys(get().translations).length === 0;
 
+                    if (needsFetch) {
+                        console.log(`Fetching translations for '${langToFetch}' from server...`);
+                        const { data: newTranslations } = await fetchTranslations(langToFetch);
+
+                        let newCurrencies = get().currencies;
+                        if (get().shouldFetchCurrencies) {
+                            console.log("Currency fetching is enabled. Fetching from server...");
+                            const { data } = await fetchCurrencies();
+                            newCurrencies = data;
+                        }
                         set({
                             translations: newTranslations,
                             currencies: newCurrencies,
@@ -52,25 +72,36 @@ export const useLocalizationStore = create(
                         });
                     } else {
                         console.log('Translations are up to date.');
+                        // This is crucial: if we don't fetch, we must still ensure the status is ready.
                         set({ status: 'ready' });
                     }
                 } catch (error) {
-                    console.error('Failed to sync localization:', error);
+                    console.error(`Failed to sync localization for '${langToFetch}':`, error);
                     set({ status: 'error' });
                 }
             },
 
+            // **REFACTORED setLanguage**
             setLanguage: (langCode) => {
-                if (get().currentLang === langCode) return;
-                set({ currentLang: langCode, translations: {} }); // Clear old translations
-                get().fetchAndSync(); // Re-fetch data for the new language
+                const { currentLang, status } = get();
+
+                if (currentLang === langCode || status === 'loading') {
+                    return;
+                }
+
+                // 1. Set the new language.
+                // 2. CRUCIALLY, reset the translationVersion to 0. This FORCES fetchAndSync to see a version mismatch and fetch new data.
+                // 3. Clear the old translations to prevent showing stale data.
+                set({ currentLang: langCode, translationVersion: 0, translations: {} });
+
+                // 4. Delegate all fetching and state setting to our single, robust function.
+                get().fetchAndSync();
             },
         }),
         {
-            // CONFIG for PERSISTENCE
-            name: 'localization-storage', // Key used in AsyncStorage
+            // CONFIG for PERSISTENCE (no changes needed here)
+            name: 'localization-storage',
             storage: createJSONStorage(() => AsyncStorage),
-            // Only persist these specific fields to local storage
             partialize: (state) => ({
                 translations: state.translations,
                 currencies: state.currencies,

@@ -4,6 +4,8 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { configureApiClient, fetchSyncVersions, fetchTranslations, fetchCurrencies } from './api';
 
+const rtlLanguages = ['ar', 'ur', 'he', 'fa', 'yi'];
+
 export const useLocalizationStore = create(
     persist(
         (set, get) => ({
@@ -12,6 +14,7 @@ export const useLocalizationStore = create(
             translations: {},
             currencies: {},
             currentLang: 'en',
+            isRTL: false,
             translationVersion: 0,
             currencyVersion: 0,
             shouldFetchCurrencies: false,
@@ -86,11 +89,12 @@ export const useLocalizationStore = create(
                     return;
                 }
 
+                const isRTL = rtlLanguages.includes(langCode);
                 // The setLanguage function's ONLY job is to update the state and trigger a fetch.
                 // 1. Set the new language.
                 // 2. Clear old translations to prevent showing stale data.
                 // 3. Reset translationVersion to 0. This is the KEY that tells fetchAndSync it MUST fetch new data.
-                set({ currentLang: langCode, translations: {}, translationVersion: 0 });
+                set({ currentLang: langCode, translations: {}, translationVersion: 0, isRTL: isRTL });
 
                 // 4. Delegate all fetching logic to our single, robust function.
                 get().fetchAndSync();
@@ -104,6 +108,7 @@ export const useLocalizationStore = create(
                 translations: state.translations,
                 currencies: state.currencies,
                 currentLang: state.currentLang,
+                isRTL: state.isRTL,
                 translationVersion: state.translationVersion,
                 currencyVersion: state.currencyVersion,
             }),

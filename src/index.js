@@ -19,7 +19,7 @@ export const initLocalization = (config) => {
  */
 export const useLocalization = () => {
     // Select state from the store, including currencies
-    const { translations, currencies, currentLang, status, setLanguage } = useLocalizationStore();
+    const { translations, currencies, currentLang, status, setLanguage, isRTL } = useLocalizationStore();
 
     /**
      * The translation function.
@@ -31,5 +31,5 @@ export const useLocalization = () => {
     };
 
     // Expose currencies in the return object
-    return { t, currencies, currentLang, status, setLanguage };
+    return { t, currencies, currentLang, isRTL, status, setLanguage };
 };

@@ -57,7 +57,7 @@ import YourAppNavigation from "./src/YourAppNavigation";
 
 // Initialize the service at startup
 initLocalization({
-  apiUrl: "https://api.global.karimapps.com/api/v1", // <-- Your backend API URL
+  apiUrl: "https://api.globalize.karimapps.com/api/v1", // <-- Your backend API URL
   apiKey: "YOUR_SECURE_API_KEY_HERE", // <-- Your app's unique API Key
   defaultLanguage: "en", // Optional: fallback language
   fetchCurrencies: false, // Optional: set to true to enable currency fetching
@@ -133,17 +133,114 @@ const styles = StyleSheet.create({
 export default HomeScreen;
 ```
 
+# Handling RTL (Right-to-Left) Layouts
+
+This guide provides a complete, step-by-step process for implementing automatic Right-to-Left (RTL) layout switching in your React Native application using the `react-native-global-translator` package.
+
+Languages such as Arabic (`ar`), Urdu (`ur`), and Hebrew (`he`) are read from right to left. For a truly native user experience, your app's entire layout must flip to accommodate this.
+
+React Native uses the native `I18nManager` module to control layout direction.
+
+> **⚠️ Important:** Changing the layout direction with `I18nManager.forceRTL()` requires a **full application restart** to take effect. The following code handles this gracefully.
+
+Place this logic in a top-level component, like `App.js`, so it runs once when the app's language state changes.
+
+```javascript
+// A good place for this is your root navigator or App.js
+
+import React, { useEffect } from "react";
+import { I18nManager, Alert } from "react-native";
+import { useLocalization } from "react-native-global-translator";
+import * as Updates from "expo-updates"; // For Expo apps
+
+// If not using Expo, you might use a library like 'react-native-restart'.
+// import RNRestart from 'react-native-restart';
+
+export default function AppLayout() {
+  const { isRTL } = useLocalization();
+
+  useEffect(() => {
+    // Compare the app's current layout direction with our state.
+    if (I18nManager.isRTL !== isRTL) {
+      // If they don't match, force the new layout direction.
+      I18nManager.forceRTL(isRTL);
+
+      // Show a confirmation alert and then reload the app to apply the changes.
+      Alert.alert(
+        "Language Change",
+        "The app needs to restart to apply the new language direction.",
+        [{ text: "OK", onPress: () => Updates.reloadAsync() }] // For Expo
+        // [{ text: 'OK', onPress: () => RNRestart.Restart() }] // For non-Expo
+      );
+    }
+  }, [isRTL]); // This effect runs ONLY when the isRTL flag changes.
+
+  // ... return your app's navigation or main screen
+  return <YourAppNavigation />;
+}
+```
+
+## Writing RTL-Friendly Styles
+
+Write your component styles so they automatically adapt to the layout direction.
+
+### The Golden Rule: Use `start` and `end`
+
+React Native's layout engine (Yoga) understands **logical properties**. Always prefer these over absolute `left` and `right` properties.
+
+| Do This 👍 (Logical) | Don't Do This 👎 (Absolute) | Why?                                                                    |
+| :------------------- | :-------------------------- | :---------------------------------------------------------------------- |
+| `marginStart: 10`    | `marginLeft: 10`            | `marginStart` is "left" in LTR and "right" in RTL.                      |
+| `marginEnd: 10`      | `marginRight: 10`           | `marginEnd` is "right" in LTR and "left" in RTL.                        |
+| `paddingStart: 10`   | `paddingLeft: 10`           | `paddingStart` is "left" in LTR and "right" in RTL.                     |
+| `borderEndWidth: 1`  | `borderRightWidth: 1`       | The border will be on the correct side automatically.                   |
+| `textAlign: 'start'` | `textAlign: 'left'`         | Text will align to the start of the line (left for LTR, right for RTL). |
+
+### Handling Exceptions
+
+Some styles don't have logical equivalents and must be handled manually using the `isRTL` flag.
+
+#### `flexDirection`
+
+`flexDirection: 'row'` always lays out items from left to right. To flip the order of items in RTL, you must explicitly use `row-reverse`.
+
+```jsx
+const { isRTL } = useLocalization();
+//...
+<View style={{ flexDirection: isRTL ? "row-reverse" : "row" }}>
+  <Text>First Item</Text>
+  <Text>Second Item</Text>
+</View>;
+```
+
+#### Directional Icons
+
+Icons like back arrows or chevrons need to be flipped horizontally.
+
+```jsx
+import { Feather } from "@expo/vector-icons";
+//...
+const { isRTL } = useLocalization();
+//...
+<Feather
+  name="arrow-left"
+  size={24}
+  style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
+/>;
+```
+
 ## 🧠 API Reference
 
 The `useLocalization()` hook returns an object with the following properties:
 
-| **Name**      | **Type**   | **Description**                                                              |
-| ------------- | ---------- | ---------------------------------------------------------------------------- |
-| `t`           | `function` | The translation function. Takes a string key (e.g., `'buttons.submit'`).     |
-| `status`      | `string`   | The current state of the store: `'idle'`, `'loading'`, `'ready'`, `'error'`. |
-| `currentLang` | `string`   | The currently active language code (e.g., `'en'`, `'es'`).                   |
-| `setLanguage` | `function` | Function to switch the language. Example: `setLanguage('es')`.               |
-| `currencies`  | `object`   | The object containing currency data, if fetchCurrencies was enabled.         |
+| **Name**      | **Type**   | **Description**                                                                                                  |
+| ------------- | ---------- | ---------------------------------------------------------------------------------------------------------------- |
+| `t`           | `function` | The translation function. Takes a string key (e.g., `'buttons.submit'`).                                         |
+| `status`      | `string`   | The current state of the store: `'idle'`, `'loading'`, `'ready'`, `'error'`.                                     |
+| `currentLang` | `string`   | The currently active language code (e.g., `'en'`, `'es'`).                                                       |
+| `setLanguage` | `function` | Function to switch the language. Example: `setLanguage('es')`.                                                   |
+| `currencies`  | `object`   | The object containing currency data, if fetchCurrencies was enabled.                                             |
+| `isRTL`       | `boolean`  | Indicates whether the current language is a right-to-left (RTL) language. Useful for adjusting layout direction. |
 
 ---
 
@@ -151,11 +248,11 @@ The `useLocalization()` hook returns an object with the following properties:
 
 To get started, you first need an account on the management platform. Registration is handled by a Super Admin to ensure security.
 
-- **Platform URL:** [https://global.karimapps.com](https://global.karimapps.com)
+- **Platform URL:** [https://globalize.karimapps.com](https://globalize.karimapps.com)
 
 > ⚠️ **Note:** Please visit the main platform and contact the administrator for account setup. Once you have an account, you can log in to the admin panel to manage all your apps, languages, and translations.
 
-- **Admin Panel Login:** [https://global.karimapps.com/admin](https://global.karimapps.com/admin)
+- **Admin Panel Login:** [https://globalize.karimapps.com/admin](https://globalize.karimapps.com/admin)
 
 ## 🪪 License
 

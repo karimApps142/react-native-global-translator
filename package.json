@@ -1,6 +1,6 @@
 {
   "name": "react-native-global-translator",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A client-side library for React Native to dynamically manage translations and currencies from a central API using Zustand.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
